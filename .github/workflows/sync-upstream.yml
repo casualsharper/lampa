@@ -1,0 +1,59 @@
+name: Sync upstream
+
+# Rebuilds the home branch as: latest yumata/lampa + selfhost/patch.py + our own files.
+# If a patch no longer matches upstream, the run fails and home stays on the last good build.
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [home]
+    paths: ['selfhost/patch.py']
+
+permissions:
+  contents: write
+
+concurrency: sync-upstream
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: home
+          fetch-depth: 0
+
+      - name: Build patched upstream
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git fetch --no-tags https://github.com/yumata/lampa.git main
+          UPSTREAM=$(git rev-parse FETCH_HEAD)
+          HOME_SHA=$(git rev-parse HEAD)
+
+          git checkout -q --detach "$UPSTREAM"
+          git checkout -q "$HOME_SHA" -- selfhost defaults.js common.js homesync.js torrents.js episodes.js cast.js audiofix.js continue.js README.md .github .gitignore
+          python3 selfhost/patch.py
+          node --check app.min.js
+          node --check defaults.js
+          for f in common.js homesync.js torrents.js episodes.js cast.js audiofix.js continue.js; do node --check "$f"; done
+          node --test selfhost/test_torrents.js selfhost/test_episodes.js selfhost/test_cast.js selfhost/test_audiofix.js selfhost/test_continue.js selfhost/test_common.js
+          (cd selfhost && python3 -m unittest -q test_server test_patch)
+
+          git add -A
+          TREE=$(git write-tree)
+          if [ "$TREE" = "$(git rev-parse "$HOME_SHA^{tree}")" ]; then
+            echo "home is already up to date with upstream ${UPSTREAM:0:7}"
+            exit 0
+          fi
+
+          PARENTS="-p $HOME_SHA"
+          if ! git merge-base --is-ancestor "$UPSTREAM" "$HOME_SHA"; then PARENTS="$PARENTS -p $UPSTREAM"; fi
+          COMMIT=$(git commit-tree "$TREE" $PARENTS -m "Sync upstream ${UPSTREAM:0:7} with self-host patches")
+          git push origin "$COMMIT:refs/heads/home"
+          git push origin "$UPSTREAM:refs/heads/main" || echo "main mirror not fast-forward; left as is"
