@@ -87,6 +87,9 @@ CUB's account sync is replaced by your own server:
 ### Screen and input
 
 - **Ultrawide screens**: the layout is sized from a 16:9 width, so 21:9 monitors no longer get oversized cards.
+- **Crop black bars**: many releases keep a wide film's black bars inside a 16:9 frame, which on a 21:9 screen leaves
+  bars on all four sides. The player finds the bars in a few frames and zooms the picture evenly until it fits the screen
+  (never stretched). Only with the player's Default size; Settings → Profile → Crop black bars turns it off.
 - **Mouse and trackpad**: the wheel scrolls the page wherever the mouse is, a sideways swipe or Shift+wheel scrolls a row,
   and the amount follows the wheel. The original decided by which half of the screen the mouse was on and jumped a fixed
   distance at most every 200 ms.
@@ -133,6 +136,7 @@ If it is not writable, the log says so at start and Lampa shows "Home sync can't
 | `episodes.js` | New-episode alerts |
 | `cast.js` | Send to device |
 | `audiofix.js` | Browser audio fix (client side) |
+| `autocrop.js` | Crop black bars |
 | `continue.js` | Continue watching button and progress badges on cards |
 | `selfhost/server.py` | The server: app files, allowlist, home sync, send-to-device, audio fix |
 | `selfhost/patch.py` | All changes to Lampa's own `app.min.js` and `index.html`, re-applied to each upstream release |

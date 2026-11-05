@@ -6,7 +6,7 @@ test('personal settings sync, device settings do not', () => {
     for (const name of ['playbest_lang_1', 'audiofix', 'language', 'tmdb_lang', 'menu_sort', 'menu_hide', 'content_rows_continue_watch']) {
         assert.ok(common.isProfilePref(name), name);
     }
-    for (const name of ['player', 'player_torrent', 'torrserver_url', 'jackett_key', 'interface_size', 'device_name',
+    for (const name of ['player', 'player_torrent', 'autocrop', 'torrserver_url', 'jackett_key', 'interface_size', 'device_name',
         'favorite', 'file_view', 'homesync_profile', 'content_rows_', 'content_rows', 'homesync_prefs']) {
         assert.ok(!common.isProfilePref(name), name);
     }

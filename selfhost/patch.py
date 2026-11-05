@@ -208,7 +208,7 @@ OUTSIDE_PLAYER = """
   }
 """
 
-OUR_SCRIPTS = ['config.js', 'defaults.js', 'common.js', 'homesync.js', 'torrents.js', 'episodes.js', 'cast.js', 'audiofix.js', 'continue.js']
+OUR_SCRIPTS = ['config.js', 'defaults.js', 'common.js', 'homesync.js', 'torrents.js', 'episodes.js', 'cast.js', 'audiofix.js', 'autocrop.js', 'continue.js']
 
 # Replaces Lampa's Scroll wheel handler. Lampa decided by which screen half the mouse was on, throttled to one
 # fixed 150px jump per 200ms, and ignored horizontal trackpad swipes.

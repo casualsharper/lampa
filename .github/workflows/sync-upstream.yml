@@ -37,12 +37,12 @@ jobs:
           HOME_SHA=$(git rev-parse HEAD)
 
           git checkout -q --detach "$UPSTREAM"
-          git checkout -q "$HOME_SHA" -- selfhost defaults.js common.js homesync.js torrents.js episodes.js cast.js audiofix.js continue.js README.md .github .gitignore
+          git checkout -q "$HOME_SHA" -- selfhost defaults.js common.js homesync.js torrents.js episodes.js cast.js audiofix.js autocrop.js continue.js README.md .github .gitignore
           python3 selfhost/patch.py
           node --check app.min.js
           node --check defaults.js
-          for f in common.js homesync.js torrents.js episodes.js cast.js audiofix.js continue.js; do node --check "$f"; done
-          node --test selfhost/test_torrents.js selfhost/test_episodes.js selfhost/test_cast.js selfhost/test_audiofix.js selfhost/test_continue.js selfhost/test_common.js
+          for f in common.js homesync.js torrents.js episodes.js cast.js audiofix.js autocrop.js continue.js; do node --check "$f"; done
+          node --test selfhost/test_torrents.js selfhost/test_episodes.js selfhost/test_cast.js selfhost/test_audiofix.js selfhost/test_autocrop.js selfhost/test_continue.js selfhost/test_common.js
           (cd selfhost && python3 -m unittest -q test_server test_patch)
 
           git add -A
