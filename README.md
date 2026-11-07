@@ -58,6 +58,8 @@ CUB's account sync is replaced by your own server:
   priority. Seeking within what is loaded is instant; jumping further (or resuming) restarts the conversion (1–3 s) at the
   nearest keyframe before that point, with audio and video starting together so they stay in sync. Not used for
   Safari/iPhone (use VLC or Infuse there) or when an outside player is chosen, since those decode everything.
+  Video browsers cannot decode at all (Xvid/DivX in old `.avi` rips, WMV, MPEG-2) would play as sound over a black
+  screen; that video is converted to H.264 on the same pass, which costs the server noticeably more CPU.
   Settings → Profile → Fix browser audio.
 - **Play best**: a row on top of every torrent list picks the release most likely to play on this device (it asks the
   browser what it can decode: HEVC, Dolby, MKV) in your preferred audio language, then by quality and seeders. CAM

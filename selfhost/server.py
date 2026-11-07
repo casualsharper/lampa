@@ -55,8 +55,11 @@ MAX_NAME = 40
 
 FFMPEG = shutil.which('ffmpeg')
 FFPROBE = shutil.which('ffprobe')
-# Each conversion is one ffmpeg process copying video and re-encoding one audio track; a seek starts a new one.
+# Each conversion is one ffmpeg process re-encoding one audio track, and the video only when it is not in
+# BROWSER_VIDEO; a seek starts a new one.
 MAX_CONVERSIONS = 3
+# Twin of BROWSER_VIDEO in audiofix.js. Others (mpeg4 = Xvid/DivX, wmv, mpeg2video...) play as audio over black.
+BROWSER_VIDEO = ('h264', 'hevc', 'vp9', 'av1')
 # A fresh torrent can take a minute to deliver the needed pieces (an MP4 keeps its index at the end of the file).
 PROBE_TIMEOUT = 90
 # Longest wait for one read from TorrServer before ffmpeg gives up, in microseconds.
@@ -373,7 +376,11 @@ def stream_args(src, audio_index, mode, start, video_codec):
         # Copied video can only start at a keyframe. An exact seek starts the audio later than that, and browsers play
         # straight through the gap: audio ran ahead by up to a keyframe interval. Both start at the keyframe instead.
         args += ['-noaccurate_seek', '-ss', '%.2f' % start]
-    args += ['-i', src, '-map', '0:v:0', '-map', '0:%d' % audio_index, '-c:v', 'copy']
+    args += ['-i', src, '-map', '0:v:0', '-map', '0:%d' % audio_index]
+    if video_codec and video_codec not in BROWSER_VIDEO:
+        args += ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p']
+    else:
+        args += ['-c:v', 'copy']
     if video_codec == 'hevc':
         args += ['-tag:v', 'hvc1']
     if mode == 'copy':

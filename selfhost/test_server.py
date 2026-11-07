@@ -401,6 +401,15 @@ class AudioFixUnitTest(unittest.TestCase):
         self.assertNotIn('-af', plain)
         self.assertNotIn('-tag:v', plain)
         self.assertEqual(plain[plain.index('-c:a') + 1], 'copy')
+        self.assertEqual(plain[plain.index('-c:v') + 1], 'copy')
+
+    def test_video_browsers_cannot_play_is_converted_to_h264(self):
+        xvid = server.stream_args(TS + '/s', 1, 'aac', 0, 'mpeg4')
+        self.assertEqual(xvid[xvid.index('-c:v') + 1], 'libx264')
+        self.assertEqual(xvid[xvid.index('-pix_fmt') + 1], 'yuv420p')
+        for codec in ['h264', 'hevc', 'vp9', 'av1', '']:
+            args = server.stream_args(TS + '/s', 1, 'aac', 0, codec)
+            self.assertEqual(args[args.index('-c:v') + 1], 'copy', codec)
 
     def test_stream_query_validation(self):
         src = urllib.parse.quote(TS + '/stream/a.mkv?link=x&index=1&play', safe='')

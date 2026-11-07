@@ -55,3 +55,15 @@ test('the source stream is read back from a conversion URL, also after a seek', 
     assert.strictEqual(af.sourceOf(url + '&t=30.00'), src);
     assert.strictEqual(af.sourceOf('http://lampa.lan/x'), '');
 });
+
+test('video a browser cannot play goes through the conversion even when the audio plays', () => {
+    const p = af.plan(probe([track(1, 'aac', 'eng', true)], { video: 'mpeg4' }), CHROME, ['en']);
+    assert.deepStrictEqual([p.audio, p.mode, p.convertVideo, p.video], [1, 'copy', true, 'mpeg4']);
+    assert.strictEqual(af.describe(p), 'EN AAC, video MPEG4 → H.264');
+    assert.strictEqual(af.plan(probe([track(1, 'mp3', 'eng', true)], { video: 'vp9' }), CHROME, ['en']), null);
+    assert.strictEqual(af.plan(probe([track(1, 'aac', 'eng', true)], { video: null }), CHROME, ['en']), null);
+});
+
+test('an audio-only conversion leaves the video copied', () => {
+    assert.strictEqual(af.plan(probe([track(1, 'ac3', 'eng', true)]), CHROME, ['en']).convertVideo, false);
+});

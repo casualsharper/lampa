@@ -8,6 +8,8 @@
     // TV platforms play through their own native players, which decode these codecs.
     var NATIVE_PLATFORMS = ['tizen', 'webos', 'orsay', 'netcast'];
     var COPYABLE = ['aac', 'mp3', 'ac3', 'eac3', 'opus', 'flac'];
+    // Twin of BROWSER_VIDEO in selfhost/server.py, which converts any other video to H.264.
+    var BROWSER_VIDEO = ['h264', 'hevc', 'vp9', 'av1'];
     // ISO 639-2 audio tags in files vs. the two-letter codes of the language setting.
     var LANG3 = { eng: 'en', rus: 'ru', ukr: 'uk', lav: 'lv', lit: 'lt', est: 'et', ger: 'de', deu: 'de', fre: 'fr', fra: 'fr',
         spa: 'es', ita: 'it', pol: 'pl', jpn: 'ja', kor: 'ko', chi: 'zh', zho: 'zh' };
@@ -43,12 +45,14 @@
         chosen = chosen || byDefault;
 
         var ok = playable(chosen.codec, caps);
-        if (ok && chosen.index === byDefault.index) return null;
+        var convertVideo = Boolean(probe.video) && BROWSER_VIDEO.indexOf(probe.video) < 0;
+        if (ok && chosen.index === byDefault.index && !convertVideo) return null;
         return {
             audio: chosen.index,
             mode: ok && COPYABLE.indexOf(chosen.codec) >= 0 ? 'copy' : 'aac',
             duration: probe.duration || 0,
             video: probe.video || '',
+            convertVideo: convertVideo,
             track: chosen
         };
     }
@@ -65,7 +69,8 @@
 
     function describe(p) {
         var lang = langOf(p.track);
-        return (lang ? lang.toUpperCase() + ' ' : '') + p.track.codec.toUpperCase() + (p.mode == 'aac' ? ' → AAC' : '');
+        return (lang ? lang.toUpperCase() + ' ' : '') + p.track.codec.toUpperCase() + (p.mode == 'aac' ? ' → AAC' : '') +
+            (p.convertVideo ? ', video ' + p.video.toUpperCase() + ' → H.264' : '');
     }
 
     var core = { plan: plan, streamUrl: streamUrl, sourceOf: sourceOf, langOf: langOf, describe: describe };
