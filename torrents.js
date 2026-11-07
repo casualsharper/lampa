@@ -403,6 +403,14 @@
         e.scroll.append(row);
     }
 
+    function startOnlyMovieFile(e) {
+        if (e.type != 'render' || e.items.length != 1 || HomeCommon.isSeries(e.params.movie)) return;
+        // Lampa shows the list and starts its 10 s countdown after this event; the enter handler stops the countdown.
+        setTimeout(function () {
+            e.item.trigger('hover:enter');
+        }, 0);
+    }
+
     function start() {
         var style = document.createElement('style');
         style.textContent = '.playbest { border: 0.15em solid rgba(255,255,255,0.4); } .playbest__why { margin-top: 0.5em; opacity: 0.7; }';
@@ -421,6 +429,7 @@
             return push.apply(this, arguments);
         };
         Lampa.Listener.follow('activity', forgetOnLeave);
+        Lampa.Listener.follow('torrent_file', startOnlyMovieFile);
         Lampa.Listener.follow('torrent', function (e) {
             if (e.type == 'filtred') onFiltred(e);
             if (e.type == 'results') {
