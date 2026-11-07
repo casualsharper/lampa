@@ -77,7 +77,7 @@ def app_patches(source):
          'fontSize: Math.max(Math.min(window.innerWidth, window.innerHeight * 16 / 9) / 84.17 * fs, 10.6)'),
 
         ('android: allow torrent playback in Android browsers (no APK nag)',
-         r"\n[ \t]*if \(navigator\.userAgent\.toLowerCase\(\)\.indexOf\('android'\) >= 0 && !Platform\.is\('android'\)\) return Platform\.install\('apk'\);",
+         r"\n[ \t]*if \(navigator\.userAgent\.toLowerCase\(\)\.indexOf\('android'\) >= 0 && !Platform\.is\('android'\)(?: && [^\n]*?)?\) return Platform\.install\('apk'\);",
          ''),
 
         ('android: Platform.androidBrowser()',
