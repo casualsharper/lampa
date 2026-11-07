@@ -33,6 +33,10 @@
         de: 'Deutsch', fr: 'Français', es: 'Español', it: 'Italiano', pl: 'Polski', ja: '日本語', ko: '한국어', zh: '中文'
     };
 
+    function isSeries(card) {
+        return Boolean(card && (card.number_of_seasons || card.original_name || (card.name && !card.title)));
+    }
+
     function hostOf(address) {
         return String(address || '').replace(/^https?:\/\//i, '').split('/')[0].toLowerCase();
     }
@@ -76,7 +80,7 @@
     var common = { hostOf: hostOf, isTorrServerUrl: isTorrServerUrl, torrserverAddress: torrserverAddress,
         parseLangList: parseLangList, languageOrder: languageOrder, preferredLangs: preferredLangs,
         LANG_KEYS: LANG_KEYS, LANGUAGES: LANGUAGES, RESUME_KEY: RESUME_KEY, AUDIOFIX_KEY: AUDIOFIX_KEY,
-        isProfilePref: isProfilePref, prefText: prefText };
+        isProfilePref: isProfilePref, prefText: prefText, isSeries: isSeries };
     if (typeof module === 'object' && module.exports) module.exports = common;
     root.HomeCommon = common;
 })(typeof window !== 'undefined' ? window : globalThis);

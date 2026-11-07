@@ -19,7 +19,7 @@
     }
 
     function methodOf(card) {
-        return card.number_of_seasons || card.original_name || (card.name && !card.title) ? 'tv' : 'movie';
+        return HomeCommon.isSeries(card) ? 'tv' : 'movie';
     }
 
     var core = { defaultName: defaultName, methodOf: methodOf };

@@ -238,9 +238,19 @@
         return e.from === null || (e.from <= pick.episode && pick.episode <= e.to);
     }
 
+    // Indexers match Latin and Cyrillic words; an original title like "ゴジラ-0.0" matches nothing and some answer
+    // with their latest-releases feed instead. Such a title is swapped for the translated one.
+    function searchQuery(search, card) {
+        var original = card.original_title || card.original_name || '';
+        var translated = card.title || card.name || '';
+        if (!original || !translated || /[a-zÀ-ɏЀ-ӿ]/i.test(original) || search.indexOf(original) < 0) return search;
+        var swapped = search.indexOf(translated) >= 0 ? search.split(original).join('') : search.split(original).join(translated);
+        return swapped.replace(/\s+/g, ' ').trim();
+    }
+
     var core = { parseTitle: parseTitle, playability: playability, score: score, pickBest: pickBest,
         parseEpisodes: parseEpisodes, groupEpisodes: groupEpisodes, groupSeasons: groupSeasons, groupPick: groupPick,
-        pickLabel: pickLabel, matchesPick: matchesPick };
+        pickLabel: pickLabel, matchesPick: matchesPick, searchQuery: searchQuery };
     if (typeof module === 'object' && module.exports) module.exports = core;
     if (!root.document) return;
 
@@ -359,6 +369,7 @@
     }
 
     function addEpisodeRow(e) {
+        if (!HomeCommon.isSeries(e.movie)) return;
         var seasons = groupSeasons(e.component.homeEpisodeSource || e.results);
         if (!seasons) return;
         var pick = pickFor(e.movie);
@@ -404,6 +415,11 @@
                 field: { name: place + ' audio language', description: i === 0 ? 'Preferred audio, best first. Used by "Play best" and "Fix browser audio".' : '' }
             });
         });
+        var push = Lampa.Activity.push;
+        Lampa.Activity.push = function (params) {
+            if (params && params.component == 'torrents' && params.movie && typeof params.search == 'string') params.search = searchQuery(params.search, params.movie);
+            return push.apply(this, arguments);
+        };
         Lampa.Listener.follow('activity', forgetOnLeave);
         Lampa.Listener.follow('torrent', function (e) {
             if (e.type == 'filtred') onFiltred(e);

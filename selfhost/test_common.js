@@ -18,3 +18,11 @@ test('settings are stored as the text Lampa keeps in localStorage', () => {
     assert.strictEqual(common.prefText('ru'), 'ru');
     assert.strictEqual(common.prefText(5), '5');
 });
+
+test('series cards are told apart from movies', () => {
+    assert.strictEqual(common.isSeries({ title: 'Godzilla Minus Zero', original_title: 'ゴジラ-0.0', release_date: '2026-11-03' }), false);
+    assert.strictEqual(common.isSeries({ name: 'VisionQuest', original_name: 'VisionQuest' }), true);
+    assert.strictEqual(common.isSeries({ title: 'Show', number_of_seasons: 2 }), true);
+    assert.strictEqual(common.isSeries({ name: 'Show' }), true);
+    assert.strictEqual(common.isSeries(null), false);
+});

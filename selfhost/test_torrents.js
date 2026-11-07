@@ -187,3 +187,18 @@ test('audio language order from the three dropdowns, with the old typed list as 
     assert.deepStrictEqual(common.languageOrder([null, null, null], 'lv, ru'), ['lv', 'ru']);
     assert.deepStrictEqual(common.languageOrder([null, null, null], ''), ['en']);
 });
+
+test('an original title without Latin or Cyrillic letters is searched by its translated title', () => {
+    const movie = { title: 'Godzilla Minus Zero', original_title: 'ゴジラ-0.0' };
+    assert.strictEqual(pb.searchQuery('ゴジラ-0.0', movie), 'Godzilla Minus Zero');
+    assert.strictEqual(pb.searchQuery('ゴジラ-0.0 2026', movie), 'Godzilla Minus Zero 2026');
+    assert.strictEqual(pb.searchQuery('ゴジラ-0.0 Godzilla Minus Zero 2026', movie), 'Godzilla Minus Zero 2026');
+    assert.strictEqual(pb.searchQuery('기생충 S01', { name: 'Parasite', original_name: '기생충' }), 'Parasite S01');
+});
+
+test('readable original titles and searches without them are left alone', () => {
+    assert.strictEqual(pb.searchQuery('Amélie 2001', { title: 'Amelie', original_title: 'Amélie' }), 'Amélie 2001');
+    assert.strictEqual(pb.searchQuery('Брат', { title: 'Brother', original_title: 'Брат' }), 'Брат');
+    assert.strictEqual(pb.searchQuery('Godzilla Minus Zero', { title: 'Godzilla Minus Zero', original_title: 'ゴジラ-0.0' }), 'Godzilla Minus Zero');
+    assert.strictEqual(pb.searchQuery('ゴジラ-0.0', { original_title: 'ゴジラ-0.0' }), 'ゴジラ-0.0');
+});
