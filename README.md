@@ -64,6 +64,9 @@ CUB's account sync is replaced by your own server:
 - **Play best**: a row on top of every torrent list picks the release most likely to play on this device (it asks the
   browser what it can decode: HEVC, Dolby, MKV) in your preferred audio language, then by quality and seeders. CAM
   and dead torrents lose. Settings → Profile → 1st, 2nd and 3rd audio language.
+- **Right releases only**: a movie's torrent list hides releases with seasons or episodes (`S01E02`, `S01`), and
+  then releases from another year (one year off still counts); a series' list hides releases without them. A step
+  that would hide everything is skipped.
 - **Episode picker**: series torrent lists get an "Episode" row. It lists seasons first; a season opens into "All of
   season 2", its packs and its episodes. Pick `S2E7` and only its releases (plus season packs containing it) remain;
   Play best then prefers that exact episode over packs.

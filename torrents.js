@@ -238,6 +238,34 @@
         return e.from === null || (e.from <= pick.episode && pick.episode <= e.to);
     }
 
+    function yearsIn(title) {
+        var years = [];
+        var re = /(?:^|\D)((?:19|20)\d{2})(?!\d)/g;
+        var m;
+        while ((m = re.exec(title || ''))) years.push(+m[1]);
+        return years;
+    }
+
+    function keepIfAny(elements, test) {
+        var kept = elements.filter(test);
+        return kept.length ? kept : elements;
+    }
+
+    // Each step is skipped when it would leave nothing; release years are off by one often (festival vs. release).
+    function narrowToCard(elements, card, series) {
+        var rightKind = keepIfAny(elements, function (element) {
+            var episodes = parseEpisodes(element.Title) || /(?:^|[^a-z\d])E\d{1,3}-E?\d{1,3}(?!\d)/i.test(element.Title);
+            return Boolean(episodes) == series;
+        });
+        var year = parseInt(((card && card.release_date) || '').slice(0, 4), 10);
+        if (series) return rightKind;
+        return keepIfAny(rightKind, function (element) {
+            return yearsIn(element.Title).some(function (y) {
+                return Math.abs(y - year) <= 1;
+            });
+        });
+    }
+
     // Indexers match Latin and Cyrillic words; an original title like "ゴジラ-0.0" matches nothing and some answer
     // with their latest-releases feed instead. Such a title is swapped for the translated one.
     function searchQuery(search, card) {
@@ -250,7 +278,7 @@
 
     var core = { parseTitle: parseTitle, playability: playability, score: score, pickBest: pickBest,
         parseEpisodes: parseEpisodes, groupEpisodes: groupEpisodes, groupSeasons: groupSeasons, groupPick: groupPick,
-        pickLabel: pickLabel, matchesPick: matchesPick, searchQuery: searchQuery };
+        pickLabel: pickLabel, matchesPick: matchesPick, searchQuery: searchQuery, narrowToCard: narrowToCard };
     if (typeof module === 'object' && module.exports) module.exports = core;
     if (!root.document) return;
 
@@ -310,6 +338,7 @@
 
     // Applied inside Lampa's own filtering, so paging, sorting and Play best all see the narrowed list.
     function onFiltred(e) {
+        e.data.results = narrowToCard(e.data.results, e.data.movie, HomeCommon.isSeries(e.data.movie));
         e.data.component.homeEpisodeSource = e.data.results;
         var pick = pickFor(e.data.movie);
         if (!pick) return;

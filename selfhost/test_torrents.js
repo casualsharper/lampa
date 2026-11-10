@@ -202,3 +202,49 @@ test('readable original titles and searches without them are left alone', () => 
     assert.strictEqual(pb.searchQuery('Godzilla Minus Zero', { title: 'Godzilla Minus Zero', original_title: 'ゴジラ-0.0' }), 'Godzilla Minus Zero');
     assert.strictEqual(pb.searchQuery('ゴジラ-0.0', { original_title: 'ゴジラ-0.0' }), 'ゴジラ-0.0');
 });
+
+const titles = (list) => list.map((e) => e.Title);
+const MOVIE = { title: 'Godzilla Minus One', release_date: '2023-11-03' };
+
+test('a movie keeps only movie releases from its year, give or take one', () => {
+    const list = [t('Godzilla Minus One 2023 1080p'), t('Godzilla Minus One 2024 BDRip'), t('Godzilla 1954 Remastered'),
+        t('Godzilla Minus One S01E02 2023'), t('Godzilla Minus One 1080p WEB')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, MOVIE, false)), ['Godzilla Minus One 2023 1080p', 'Godzilla Minus One 2024 BDRip']);
+});
+
+test('a movie whose year matches nothing keeps every movie release', () => {
+    const list = [t('Godzilla 1954 Remastered'), t('Godzilla Minus One 1080p WEB'), t('Godzilla S01E01')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, MOVIE, false)), ['Godzilla 1954 Remastered', 'Godzilla Minus One 1080p WEB']);
+});
+
+test('a movie with only episode releases keeps them all', () => {
+    const list = [t('Godzilla S01E01'), t('Godzilla S01 1080p')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, MOVIE, false)), ['Godzilla S01E01', 'Godzilla S01 1080p']);
+});
+
+test('a series keeps only releases with seasons or episodes, whatever their year', () => {
+    const series = { name: 'VisionQuest', first_air_date: '2026-10-14' };
+    const list = [t('VisionQuest S01E03 2026'), t('VisionQuest S01 2019'), t('VisionQuest 2026 1080p')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, series, true)), ['VisionQuest S01E03 2026', 'VisionQuest S01 2019']);
+});
+
+test('a series with no season or episode releases keeps them all', () => {
+    const list = [t('VisionQuest 2026 1080p'), t('VisionQuest 2026 720p')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, { name: 'VisionQuest' }, true)), ['VisionQuest 2026 1080p', 'VisionQuest 2026 720p']);
+});
+
+test('a movie without a release date skips the year step', () => {
+    const list = [t('Film 1999 1080p'), t('Film 2024 1080p')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, { title: 'Film' }, false)), ['Film 1999 1080p', 'Film 2024 1080p']);
+});
+
+test('a series card with a release date is not narrowed by year', () => {
+    const list = [t('VisionQuest S01E03 2026'), t('VisionQuest S01 2019')];
+    const series = { name: 'VisionQuest', release_date: '2026-10-14' };
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, series, true)), ['VisionQuest S01E03 2026', 'VisionQuest S01 2019']);
+});
+
+test('an episode range without a season counts as a series release', () => {
+    const list = [t('Годзилла: Сингулярность / E01-E13 Godzilla S.P 2023 [WEBRip 1080p]'), t('Godzilla.Minus.One.2023.1080p')];
+    assert.deepStrictEqual(titles(pb.narrowToCard(list, MOVIE, false)), ['Godzilla.Minus.One.2023.1080p']);
+});
