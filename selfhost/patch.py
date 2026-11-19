@@ -114,12 +114,12 @@ def app_patches(source):
 
         ('torrent list: publish the full filtered list (it only renders 20 at a time), and drop the "last watched" bar'
          ' (it only shows a season and episode, has no click action and cannot resume: it does not store the torrent)',
-         r"(\n(\s*)scroll\.append\(history\.render\(true\)\);\n)(\s*this\.append\(filtred\.slice\(0, 20\)\);)",
-         "\n\\2Lampa.Listener.send('torrent', {\n\\2  type: 'results',\n\\2  results: filtred,\n\\2  component: this,\n\\2  movie: object.movie,\n\\2  scroll: scroll\n\\2});\n\\3"),
+         r"(\n(\s*)scroll\.append\(history\.render\(true\)\);\n)(\s*this\.append\(filtered\.slice\(0, 20\)\);)",
+         "\n\\2Lampa.Listener.send('torrent', {\n\\2  type: 'results',\n\\2  results: filtered,\n\\2  component: this,\n\\2  movie: object.movie,\n\\2  scroll: scroll\n\\2});\n\\3"),
 
         ('episode picker: let our code narrow the filtered torrent list',
          r"(return nopass \? false : passed;\n\s*\} else return true;\n\s*\}\);\n)(\s*\};)",
-         "\\1      var custom = {\n        results: filtred,\n        component: this,\n        movie: object.movie\n      };\n      Lampa.Listener.send('torrent', {\n        type: 'filtred',\n        data: custom\n      });\n      filtred = custom.results;\n\\2"),
+         "\\1      var custom = {\n        results: filtered,\n        component: this,\n        movie: object.movie\n      };\n      Lampa.Listener.send('torrent', {\n        type: 'filtred',\n        data: custom\n      });\n      filtered = custom.results;\n\\2"),
 
         ('send to device: let added torrent-file menu items run their own action',
          r"(onSelect: function onSelect\(a\) \{\n)(\s*)(if \(a\.timeclear\) \{)",
@@ -128,10 +128,6 @@ def app_patches(source):
         ('mouse: wheel scrolls the page, sideways swipe or Shift+wheel scrolls a row, amount follows the wheel',
          r"(\n    )function wheel\(e\) \{\n\s*var parent = \$\(e\.target\)\.parents\('\.scroll'\);\n(?:.*\n)*?\s*\} // [^\n]*\n",
          lambda m: m.group(1) + MOUSE_WHEEL.strip() + '\n'),
-
-        ('play button: start the only source right away (upstream shows a one-item menu unless it can add "Add source", which it only does on Android)',
-         r"if \(btns\.length == 1 && !window\.lampa_settings\.plugins_use\) \{",
-         "if (btns.length == 1 && !(window.lampa_settings.plugins_use && Platform.is('android'))) {"),
 
         ('next episode: start it through Player.play like the first one (it called the internal function, skipping hooks such as the audio fix)',
          r"(e\.item\.continue_play = true;\n\s*)play\$\w+\(e\.item\);",
