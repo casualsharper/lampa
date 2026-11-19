@@ -201,6 +201,8 @@
             var token = ++state.seeks;
             state.pending = time;
             real.pause();
+            // Lampa moves its seek bar only on timeupdate, which a paused video does not send.
+            real.dispatchEvent(new Event('timeupdate'));
             keyframe(sourceOf(state.base), time, function (start) {
                 if (token !== state.seeks) return;
                 state.pending = null;
